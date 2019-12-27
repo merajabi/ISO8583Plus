@@ -6,23 +6,31 @@
 #define LOCATION std::string("::") + __func__ + "/" + __FILE__ + ":" S2(__LINE__)
 #define NAME(x) std::string(typeid(x).name())
 
+#include <map>
+#include <vector>
+#include <string>
+#include <sstream>
+
+
 class DataFormat {
-	enum DataFormat {
+
+	protected:
+	std::map<short,std::vector<short>> format;
+	std::map<std::string,std::map<short,char>> fields;
+
+	public:
+	enum Format {
 		BIN,
 		BCD,
 		XBCD,
 		ASC,
 	};
 
-	enum PackagingType {
+	enum Type {
 		FIX,
 		VAR,
 	};
-}
-	std::map<short,std::vector<short>> format;
-	std::map<std::string,std::map<short,char>> fields;
 
-	public:
 	DataFormat(){
 		InitFormats();
 		InitFields();
@@ -33,7 +41,7 @@ class DataFormat {
 
 	virtual void InitFormats () = 0;
 
-	std::vector<uint8_t> GetFieldFormat(short fieldNumber) {
+	std::vector<short> GetFieldFormat(short fieldNumber) {
 		std::map<short,std::vector<short>>::iterator it = format.find(fieldNumber);
 		if ( it != format.end() ) {
 			return it->second;
