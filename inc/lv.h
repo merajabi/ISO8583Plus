@@ -1,7 +1,9 @@
 #ifndef _LV_H_
 #define _LV_H_
-
+#include "tools.h"
 #include "datapackager.h"
+#include "dataformat.h"
+namespace  DataPackager {
 
 class LV : public DataPackager {
 
@@ -36,14 +38,14 @@ public:
 				throw std::logic_error(err.str());
 		}
 
-		if( datalength < 0 ){
+		if( dataLength < 0 ){
 				std::stringstream err;
-				err << NAME(this) << LOCATION << ", Invalid input data length: " << datalength ;
+				err << NAME(this) << LOCATION << ", Invalid input data length: " << dataLength ;
 				throw std::logic_error(err.str());
 		}
 		else if(dataFormat == DataFormat::BIN && dataLength%2 != 0){
 				std::stringstream err;
-				err << NAME(this) << LOCATION << ", BIN input len must be even:" << datalength ;
+				err << NAME(this) << LOCATION << ", BIN input len must be even:" << dataLength ;
 				throw std::logic_error(err.str());
 		}		
 
@@ -157,17 +159,17 @@ public:
 	}
 
 private:
-	std::string PackLen (const std::string& len) {
+	std::string PackLen (int len) {
 		std::string out;
 
 		if( lenFormat == DataFormat::BIN){
-			out = HexString(PaddedFixedLenString(len,dataLength/8));
+			out = HexString(PaddedFixedLenString(toString(len),dataLength/8));
 		}
 		else if( lenFormat == DataFormat::BCD) {
-			out = PaddedFixedLenString( len, toString(dataLength).size() + toString(dataLength).size()%2 );
+			out = PaddedFixedLenString( toString(len), toString(dataLength).size() + toString(dataLength).size()%2 );
 		}
 		else if( lenFormat == DataFormat::ASC) {
-			out = HexString(PaddedFixedLenString( len, toString(dataLength).size() ));
+			out = HexString(PaddedFixedLenString( toString(len), toString(dataLength).size() ));
 		}
 		else{
 			std::stringstream err;
@@ -203,6 +205,7 @@ private:
 	}
 
 	std::string PackFixBIN(const std::string& in){
+		std::string out;
 		if( 4*in.size() == dataLength ){ // in.size()/2==dataLength/8
 			out = in;
 		}else{
@@ -210,6 +213,7 @@ private:
 			err << NAME(this) << LOCATION << ", FIX sized BIN input len must be 4 times of Filter len:" << in.size() ;
 			throw std::logic_error(err.str());
 		}
+		return out;
 	}
 
 	std::pair<std::string,int> UnPackFixBIN(const std::string& in){
@@ -219,72 +223,80 @@ private:
 	}
 
 	std::string PackFixBCD(const std::string& in){
+		std::string out;
 		if( in.size() <= dataLength ){
-			out = PaddedFixedLenString(in,dataLength+dataLength%2, $self->{'PadCharBCD'}, $self->{'PadAlignBCD'});
+			out = PaddedFixedLenString(in,dataLength+dataLength%2);//, $self->{'PadCharBCD'}, $self->{'PadAlignBCD'});
 		}else{
 			std::stringstream err;
 			err << NAME(this) << LOCATION << ", FIX sized BCD input len must be less than or equal to Filter len:" << in.size() ;
 			throw std::logic_error(err.str());
 		}
+		return out;
 	}
 
 	std::pair<std::string,int> UnPackFixBCD(const std::string& in){
 		std::string out = in.substr(0,dataLength+dataLength%2);
-		if($self->{'PadAlignBCD'} == "LEFT"){
+		//if($self->{'PadAlignBCD'} == "LEFT"){
 			//#$out =~ s/^$self->{'PadCharBCD'}*//;
-		}else{
+		//}else{
 			//#$out =~ s/$self->{'PadCharBCD'}*$//;
-		}
+		//}
 		int len=dataLength+dataLength%2;
 
 		return std::pair<std::string,int>(out,len);
 	}
 
 	std::string PackFixXBCD(const std::string& in){
+		std::string out;
 		if( in.size() <= dataLength-1 ){
-			out = std::string( (std::stol(in)>=0)?'C':'D' )+PaddedFixedLenString(in,dataLength+dataLength%2-1, $self->{'PadCharBCD'}, $self->{'PadAlignBCD'});
+			out = std::string( (std::stol(in)>=0)?"C":"D" )+PaddedFixedLenString(in,dataLength+dataLength%2-1);//, $self->{'PadCharBCD'}, $self->{'PadAlignBCD'});
 		}else{
 			std::stringstream err;
 			err << NAME(this) << LOCATION << ", FIX sized XBCD input len must be less than or equal to Filter len-1:" << in.size() ;
 			throw std::logic_error(err.str());
 		}
+		return out;
 	}
 
 	std::pair<std::string,int> UnPackFixXBCD(const std::string& in){
 		std::string out = in.substr(1,dataLength-1);
-		if($self->{'PadAlignBCD'} eq "LEFT"){
+		
+		//if($self->{'PadAlignBCD'} eq "LEFT"){
 			//$out =~ s/^$self->{'PadCharBCD'}*//;
-		}else{
+		//}else{
 			//$out =~ s/$self->{'PadCharBCD'}*$//;
-		}
+		//}
 		int len=dataLength+dataLength%2;
 
 		return std::pair<std::string,int>(out,len);
 	}
 
 	std::string PackFixASC(const std::string& in){
+		std::string out;
 		if( in.size() <= dataLength ){
-			out = HexString(PaddedFixedLenString(in,dataLength, $self->{'PadCharASC'}, $self->{'PadAlignASC'}));
+			out = HexString(PaddedFixedLenString(in,dataLength));//$self->{'PadCharASC'}, $self->{'PadAlignASC'}
 		}else{
 			std::stringstream err;
 			err << NAME(this) << LOCATION << ", FIX sized ASC input len must be less than or equal to Filter len:" << in.size() ;
 			throw std::logic_error(err.str());
 		}
+		return out;
 	}
 
 	std::pair<std::string,int> UnPackFixASC(const std::string& in){
 		std::string out = HexToAscii(in.substr(0,dataLength*2));
-		if($self->{'PadAlignASC'} eq "LEFT"){
-			$out =~ s/^$self->{'PadCharASC'}*//;
-		}else{
-			$out =~ s/$self->{'PadCharASC'}*$//;
-		}
+		//if($self->{'PadAlignASC'} eq "LEFT"){
+		//	$out =~ s/^$self->{'PadCharASC'}*//;
+		//}else{
+		//	$out =~ s/$self->{'PadCharASC'}*$//;
+		//}
 		int len=dataLength*2;
 
 		return std::pair<std::string,int>(out,len);
 	}
 
 	std::string PackVarBIN(const std::string& in){
+		std::string out;
 		if( in.size()%2 != 0){
 			std::stringstream err;
 			err << NAME(this) << LOCATION << ", VAR sized BIN input len must be even:" << in.size() ;
@@ -299,6 +311,7 @@ private:
 			err << NAME(this) << LOCATION << ", VAR sized BIN input len must be less than or equal to Filter len:" << in.size() ;
 			throw std::logic_error(err.str());
 		}
+		return out;
 	}
 
 	std::pair<std::string,int> UnPackVarBIN(const std::string& in){
@@ -314,14 +327,16 @@ private:
 	}
 
 	std::string PackVarBCD(const std::string& in){
+		std::string out;
 		if( in.size() <= dataLength ){
 			std::string lenStr = PackLen( in.size() );
-			out = lenStr. PaddedFixedLenString(in,in.size()+in.size()%2, $self->{'PadCharBCD'}, $self->{'PadAlignBCD'});
+			out = lenStr + PaddedFixedLenString(in,in.size()+in.size()%2);//, $self->{'PadCharBCD'}, $self->{'PadAlignBCD'}
 		}else{
 			std::stringstream err;
 			err << NAME(this) << LOCATION << ", VAR sized BCD input len must be less than or equal to Filter len:" << in.size() ;
 			throw std::logic_error(err.str());
 		}
+		return out;
 	}
 
 	std::pair<std::string,int> UnPackVarBCD(const std::string& in){
@@ -331,11 +346,11 @@ private:
 
 		lenData+=lenData%2;
 		std::string out = in.substr(lenLen,lenData);
-		if($self->{'PadAlignBCD'} eq "LEFT"){
+		//if($self->{'PadAlignBCD'} eq "LEFT"){
 			//$out =~ s/^$self->{'PadCharBCD'}*//;
-		}else{
+		//}else{
 			//$out =~ s/$self->{'PadCharBCD'}*$//;
-		}
+		//}
 
 		int len = lenLen + lenData;
 
@@ -343,25 +358,32 @@ private:
 	}
 
 	std::string PackVarXBCD(const std::string& in){
+		std::string out;
 		if( in.size() <= dataLength-1 ){
 			std::string lenStr = PackLen( in.size()+1 );
-			out = lenStr + std::string( (std::stol(in)>=0)?'C':'D' ) + PaddedFixedLenString( in,in.size()+in.size()%2-1 );
+			out = lenStr + std::string( (std::stol(in)>=0)?"C":"D" ) + PaddedFixedLenString( in,in.size()+in.size()%2-1 );
 		}else{
 			std::stringstream err;
 			err << NAME(this) << LOCATION << ", VAR sized BCD input len must be less than or equal to Filter len:" << in.size() ;
 			throw std::logic_error(err.str());
 		}
+		return out;
 	}
 
 	std::pair<std::string,int> UnPackVarXBCD(const std::string& in){
-			std::pair<std::string,int> lenUnPacked = UnPackLen(in);
-			int lenData = std::stol(lenUnPacked.first);
-			int lenLen  = lenUnPacked.second;
+		std::pair<std::string,int> lenUnPacked = UnPackLen(in);
+		int lenData = std::stol(lenUnPacked.first);
+		int lenLen  = lenUnPacked.second;
+
+		lenData+=lenData%2;
+		std::string out =in.substr(lenLen+1,lenData);
+		int len = lenLen + lenData;
 
 		return std::pair<std::string,int>(out,len);
 	}
 
 	std::string PackVarASC(const std::string& in){
+		std::string out;
 		if( in.size() <= dataLength ){
 			std::string lenStr = PackLen( in.size() );
 			out = lenStr + HexString(in);
@@ -370,6 +392,7 @@ private:
 			err << NAME(this) << LOCATION << ", VAR sized ASC input len must be less than or equal to Filter len:" << in.size() ;
 			throw std::logic_error(err.str());
 		}
+		return out;
 	}
 
 	std::pair<std::string,int> UnPackVarASC(const std::string& in){
@@ -384,7 +407,7 @@ private:
 	}
 
 };
-
+} //DataPackager
 #endif //_LV_H_
 
 

@@ -11,7 +11,7 @@
 #include <string>
 #include <sstream>
 
-
+namespace  DataPackager {
 class DataFormat {
 
 	protected:
@@ -68,6 +68,6 @@ class DataFormat {
 		}
 	}
 };
-
+} // DataPackager
 #endif // _DATAFORMAT_H_
 

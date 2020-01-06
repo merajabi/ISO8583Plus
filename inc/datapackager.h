@@ -3,8 +3,10 @@
 
 #include <vector>
 #include <string>
-
+namespace  DataPackager {
 class DataPackager {
+
+protected:
 	short lenFormat;
 	short dataFormat;
 	short dataType;
@@ -16,7 +18,7 @@ public:
 	virtual std::pair<std::string,int> UnPack(const std::string& in) = 0;
 
 };
-
+} //DataPackager
 #endif //_DATAPACKAGER_H_
 
 
