@@ -5,7 +5,11 @@
 #include <string>
 
 class DataPackager {
-	std::vector<short> format;
+	short lenFormat;
+	short dataFormat;
+	short dataType;
+	short dataLength;
+
 public:
 	virtual DataPackager& Set(const std::vector<short>& v) =0;
 	virtual std::string Pack(const std::string& in) = 0;
