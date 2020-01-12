@@ -32,14 +32,14 @@ class DataFormat {
 	};
 
 	DataFormat(){
-		InitFormats();
-		InitFields();
+		this->InitFormats();
+		this->InitFields();
 	}
 
 
-	virtual void InitFields () = 0;
+	virtual void InitFields () {};
 
-	virtual void InitFormats () = 0;
+	virtual void InitFormats () {};
 
 	std::vector<short> GetFieldFormat(short fieldNumber) {
 		std::map<short,std::vector<short>>::iterator it = format.find(fieldNumber);
