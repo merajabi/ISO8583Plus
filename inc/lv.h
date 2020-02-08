@@ -8,7 +8,7 @@ namespace  DataPackager {
 class LV : public DataPackager {
 
 public:
-	DataPackager& Set(const std::vector<short>& v){
+	const DataPackager& Set(const std::vector<short>& v){
 		short lenFormat = v[0];
 		short dataFormat = v[1];
 		short dataType = v[2];
@@ -57,7 +57,7 @@ public:
 		return *this;
 	}
 
-	std::string Pack(const std::string& in){
+	std::string Pack(const std::string& in) const {
 		std::string out;
 
 		if( dataType == DataFormat::FIX){
@@ -107,7 +107,7 @@ public:
 		return out;
 	}
 
-	std::pair<std::string,int> UnPack(const std::string& in){
+	std::pair<std::string,int> UnPack(const std::string& in) const {
 		std::pair<std::string,int> out;
 
 		if( dataType == DataFormat::FIX){
@@ -159,7 +159,7 @@ public:
 	}
 
 private:
-	std::string PackLen (int len) {
+	std::string PackLen (int len) const {
 		std::string out;
 
 		if( lenFormat == DataFormat::BIN){
@@ -180,7 +180,7 @@ private:
 		return out;
 	}
 
-	std::pair<std::string,int> UnPackLen (const std::string& in) {
+	std::pair<std::string,int> UnPackLen (const std::string& in) const {
 		int len;
 		std::string out;
 
@@ -204,7 +204,7 @@ private:
 		return std::pair<std::string,int>(out,len);
 	}
 
-	std::string PackFixBIN(const std::string& in){
+	std::string PackFixBIN(const std::string& in) const {
 		std::string out;
 		if( 4*in.size() == dataLength ){ // in.size()/2==dataLength/8
 			out = in;
@@ -216,13 +216,13 @@ private:
 		return out;
 	}
 
-	std::pair<std::string,int> UnPackFixBIN(const std::string& in){
+	std::pair<std::string,int> UnPackFixBIN(const std::string& in) const {
 		std::string out = in.substr(0,dataLength/4);
 		int len = dataLength/4;
 		return std::pair<std::string,int>(out,len);
 	}
 
-	std::string PackFixBCD(const std::string& in){
+	std::string PackFixBCD(const std::string& in) const {
 		std::string out;
 		if( in.size() <= dataLength ){
 			out = PaddedFixedLenString(in,dataLength+dataLength%2);//, $self->{'PadCharBCD'}, $self->{'PadAlignBCD'});
@@ -234,7 +234,7 @@ private:
 		return out;
 	}
 
-	std::pair<std::string,int> UnPackFixBCD(const std::string& in){
+	std::pair<std::string,int> UnPackFixBCD(const std::string& in) const {
 		std::string out = in.substr(0,dataLength+dataLength%2);
 		//if($self->{'PadAlignBCD'} == "LEFT"){
 			//#$out =~ s/^$self->{'PadCharBCD'}*//;
@@ -246,7 +246,7 @@ private:
 		return std::pair<std::string,int>(out,len);
 	}
 
-	std::string PackFixXBCD(const std::string& in){
+	std::string PackFixXBCD(const std::string& in) const {
 		std::string out;
 		if( in.size() <= dataLength-1 ){
 			out = std::string( (std::stol(in)>=0)?"C":"D" )+PaddedFixedLenString(in,dataLength+dataLength%2-1);//, $self->{'PadCharBCD'}, $self->{'PadAlignBCD'});
@@ -258,7 +258,7 @@ private:
 		return out;
 	}
 
-	std::pair<std::string,int> UnPackFixXBCD(const std::string& in){
+	std::pair<std::string,int> UnPackFixXBCD(const std::string& in) const {
 		std::string out = in.substr(1,dataLength-1);
 		
 		//if($self->{'PadAlignBCD'} eq "LEFT"){
@@ -271,7 +271,7 @@ private:
 		return std::pair<std::string,int>(out,len);
 	}
 
-	std::string PackFixASC(const std::string& in){
+	std::string PackFixASC(const std::string& in) const {
 		std::string out;
 		if( in.size() <= dataLength ){
 			out = HexString(PaddedFixedLenString(in,dataLength));//$self->{'PadCharASC'}, $self->{'PadAlignASC'}
@@ -283,7 +283,7 @@ private:
 		return out;
 	}
 
-	std::pair<std::string,int> UnPackFixASC(const std::string& in){
+	std::pair<std::string,int> UnPackFixASC(const std::string& in) const {
 		std::string out = HexToAscii(in.substr(0,dataLength*2));
 		//if($self->{'PadAlignASC'} eq "LEFT"){
 		//	$out =~ s/^$self->{'PadCharASC'}*//;
@@ -295,7 +295,7 @@ private:
 		return std::pair<std::string,int>(out,len);
 	}
 
-	std::string PackVarBIN(const std::string& in){
+	std::string PackVarBIN(const std::string& in) const {
 		std::string out;
 		if( in.size()%2 != 0){
 			std::stringstream err;
@@ -314,7 +314,7 @@ private:
 		return out;
 	}
 
-	std::pair<std::string,int> UnPackVarBIN(const std::string& in){
+	std::pair<std::string,int> UnPackVarBIN(const std::string& in) const {
 		std::pair<std::string,int> lenUnPacked = UnPackLen(in);
 		int lenData = std::stol(lenUnPacked.first);
 		int lenLen  = lenUnPacked.second;
@@ -326,7 +326,7 @@ private:
 		return std::pair<std::string,int>(out,len);
 	}
 
-	std::string PackVarBCD(const std::string& in){
+	std::string PackVarBCD(const std::string& in) const {
 		std::string out;
 		if( in.size() <= dataLength ){
 			std::string lenStr = PackLen( in.size() );
@@ -339,7 +339,7 @@ private:
 		return out;
 	}
 
-	std::pair<std::string,int> UnPackVarBCD(const std::string& in){
+	std::pair<std::string,int> UnPackVarBCD(const std::string& in) const {
 		std::pair<std::string,int> lenUnPacked = UnPackLen(in);
 		int lenData = std::stol(lenUnPacked.first);
 		int lenLen  = lenUnPacked.second;
@@ -357,7 +357,7 @@ private:
 		return std::pair<std::string,int>(out,len);
 	}
 
-	std::string PackVarXBCD(const std::string& in){
+	std::string PackVarXBCD(const std::string& in) const {
 		std::string out;
 		if( in.size() <= dataLength-1 ){
 			std::string lenStr = PackLen( in.size()+1 );
@@ -370,7 +370,7 @@ private:
 		return out;
 	}
 
-	std::pair<std::string,int> UnPackVarXBCD(const std::string& in){
+	std::pair<std::string,int> UnPackVarXBCD(const std::string& in) const {
 		std::pair<std::string,int> lenUnPacked = UnPackLen(in);
 		int lenData = std::stol(lenUnPacked.first);
 		int lenLen  = lenUnPacked.second;
@@ -382,7 +382,7 @@ private:
 		return std::pair<std::string,int>(out,len);
 	}
 
-	std::string PackVarASC(const std::string& in){
+	std::string PackVarASC(const std::string& in) const {
 		std::string out;
 		if( in.size() <= dataLength ){
 			std::string lenStr = PackLen( in.size() );
@@ -395,7 +395,7 @@ private:
 		return out;
 	}
 
-	std::pair<std::string,int> UnPackVarASC(const std::string& in){
+	std::pair<std::string,int> UnPackVarASC(const std::string& in) const {
 		std::pair<std::string,int> lenUnPacked = UnPackLen(in);
 		int lenData = std::stol(lenUnPacked.first);
 		int lenLen  = lenUnPacked.second;

@@ -32,18 +32,25 @@ class DataFormat {
 	};
 
 	DataFormat(){
-		this->InitFormats();
-		this->InitFields();
 	}
 
 
-	virtual void InitFields () {};
+	virtual void InitFields () {
+		std::cout<< "DataFormat::InitFields" << std::endl;
 
-	virtual void InitFormats () {};
+	};
+
+	virtual void InitFormats () {
+		std::cout<< "DataFormat::InitFormats" << std::endl;
+
+	};
 
 	std::vector<short> GetFieldFormat(short fieldNumber) {
+		std::cout<< "DataFormat::GetFieldFormat 1: "<< fieldNumber << std::endl;
 		std::map<short,std::vector<short>>::iterator it = format.find(fieldNumber);
+
 		if ( it != format.end() ) {
+			std::cout<< "DataFormat::GetFieldFormat 2" << std::endl;
 			return it->second;
 		}else{
 			std::stringstream err;
@@ -53,8 +60,11 @@ class DataFormat {
 	}
 
 	std::map<short,char> GetFields(const std::string& mit) {
+		std::cout<< "DataFormat::GetFields 1: "<< mit << std::endl;
 		std::map<std::string,std::map<short,char>>::iterator it = fields.find(mit);
+
 		if ( it != fields.end() ) {
+			std::cout<< "DataFormat::GetFields 2" << std::endl;
 			return it->second;
 		}else{
 			it = fields.find(mit.substr(0,4));

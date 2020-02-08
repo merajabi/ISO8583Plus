@@ -13,9 +13,9 @@ protected:
 	short dataLength;
 
 public:
-	virtual DataPackager& Set(const std::vector<short>& v) =0;
-	virtual std::string Pack(const std::string& in) = 0;
-	virtual std::pair<std::string,int> UnPack(const std::string& in) = 0;
+	virtual const DataPackager& Set(const std::vector<short>& v) =0;
+	virtual std::string Pack(const std::string& in) const = 0;
+	virtual std::pair<std::string,int> UnPack(const std::string& in) const = 0;
 
 };
 } //DataPackager
